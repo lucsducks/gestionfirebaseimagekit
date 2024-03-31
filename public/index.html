@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acceso Denegado</title>
+  </head>
+  <body>
+    <h1>Google sign in</h1>
+    <hr />
+    <div
+      id="g_id_onload"
+      data-client_id="375349451260-jcrirg7me8cot4te36cbk17cqrnbep1o.apps.googleusercontent.com"
+      data-auto_prompt="false"
+      data-callback="handleCredentialResponse"
+    ></div>
+    <div
+      class="g_id_signin"
+      data-type="standard"
+      data-size="large"
+      data-theme="outline"
+      data-text="sign_in_with"
+      data-shape="rectangular"
+      data-logo_alignment="left"
+    ></div>
+    <button id="g_id_signout">Sign Out</button>
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <hr />
+    <h1>One Tap</h1>
+    <script>
+      function handleCredentialResponse(response) {
+        const body = { id_token: response.credential };
+        const API_URL = "https://restserverapi-production-d764.up.railway.app" || "http://localhost:8080";
+        fetch(`${API_URL}/api/auth/logingoogle`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        })
+          .then((resp) => resp.json())
+          .then((resp) => {
+            console.log("capa");
+            console.log(resp);
+            console.log(body);
+            localStorage.setItem("email", resp.usuarioObj.correo);
+          })
+          .catch(console.warn);
+      }
+      const button = document.getElementById("g_id_signout");
+      button.onclick = () => {
+        console.log(google.accounts.id);
+        google.accounts.id.disableAutoSelect();
+        google.accounts.id.revoke(localStorage.getItem("email"), (done) => {
+          console.log("consent revoked");
+          localStorage.clear();
+          location.reload();
+        });
+      };
+    </script>
+  </body>
+</html>
